@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BrewInstall() {
-  brew install neovim lazygit npm go
+  brew install neovim lazygit npm go fzf
 }
 
 OtherInstalls() {

@@ -10,7 +10,11 @@ OtherInstalls() {
 }
 
 CreateSymlinks() {
+  # neovim config
   ln -sf ~/github/dotfiles/nvim ~/.config/nvim
+
+  # zshrc file
+  mv ~/.zshrc ~/.zshrc.bak
   rm -rf ~/.zshrc
   ln -sf ~/github/dotfiles/.zshrc ~/.zshrc
 }

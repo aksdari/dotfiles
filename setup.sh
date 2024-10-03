@@ -13,6 +13,9 @@ CreateSymlinks() {
   # neovim config
   ln -sf ~/github/dotfiles/nvim ~/.config/nvim
 
+  # tmux config
+  ln -sf ~/github/dotfiles/.tmux.conf ~/.tmux.conf
+
   # zshrc file
   mv ~/.zshrc ~/.zshrc.bak
   rm -rf ~/.zshrc

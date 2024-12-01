@@ -23,5 +23,5 @@ CreateSymlinks() {
 }
 
 BrewInstall
-CreateSymlink
+CreateSymlinks
 echo "Dotfiles setup complete!"

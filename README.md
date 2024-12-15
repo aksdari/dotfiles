@@ -24,7 +24,15 @@ git clone https://github.com/aksdari/dotfiles.git
 stow -t ~ .
 ```
 
-4. Configure powerlevel10k
+# Terminal Setup
+
+## Wezterm
+
+```sh
+brew install --cask wezterm
+```
+
+## Configure powerlevel10k
 
 ```sh
 echo "source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme" >>~/.zshrc
@@ -33,12 +41,4 @@ source ~/.zshrc
 # you can use to trigger it manually:
 p10k configure
 
-```
-
-# Terminal Setup
-
-## Wezterm
-
-```sh
-brew install --cask wezterm
 ```

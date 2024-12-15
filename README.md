@@ -7,7 +7,10 @@ This is my dotfiles repository.
 1. Install prerequisites
 
 ```sh
-brew install neovim lazygit npm go fzf
+brew install stow neovim lazygit npm go fzf font-meslo-lg-nerd-font
+brew install --cask alacritty
+brew install powerlevel10k
+go install mvdan.cc/sh/v3/cmd/shfmt@latest
 ```
 
 2. Clone this repository
@@ -20,4 +23,15 @@ git clone https://github.com/aksdari/dotfiles.git
 
 ```sh
 stow -t ~ .
+```
+
+4. Configure powerlevel10k
+
+```sh
+echo "source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme" >>~/.zshrc
+# configure p10k
+source ~/.zshrc
+# you can use to trigger it manually:
+p10k configure
+
 ```

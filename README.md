@@ -8,7 +8,6 @@ This is my dotfiles repository.
 
 ```sh
 brew install stow neovim lazygit npm go fzf font-meslo-lg-nerd-font
-brew install --cask alacritty
 brew install powerlevel10k
 go install mvdan.cc/sh/v3/cmd/shfmt@latest
 ```
@@ -34,4 +33,12 @@ source ~/.zshrc
 # you can use to trigger it manually:
 p10k configure
 
+```
+
+# Terminal Setup
+
+## Wezterm
+
+```sh
+brew install --cask wezterm
 ```

@@ -9,19 +9,19 @@ OtherInstalls() {
   go install mvdan.cc/sh/v3/cmd/shfmt@latest
 }
 
-CreateSymlinks() {
-  # neovim config
-  ln -sf ~/github/dotfiles/nvim ~/.config/nvim
-
-  # tmux config
-  ln -sf ~/github/dotfiles/.tmux.conf ~/.tmux.conf
-
-  # zshrc file
-  mv ~/.zshrc ~/.zshrc.bak
-  rm -rf ~/.zshrc
-  ln -sf ~/github/dotfiles/.zshrc ~/.zshrc
-}
+# CreateSymlinks() {
+#   # neovim config
+#   ln -sf ~/github/dotfiles/nvim ~/.config/nvim
+#
+#   # tmux config
+#   ln -sf ~/github/dotfiles/.tmux.conf ~/.tmux.conf
+#
+#   # zshrc file
+#   mv ~/.zshrc ~/.zshrc.bak
+#   rm -rf ~/.zshrc
+#   ln -sf ~/github/dotfiles/.zshrc ~/.zshrc
+# }
 
 BrewInstall
-CreateSymlinks
+# CreateSymlinks
 echo "Dotfiles setup complete!"

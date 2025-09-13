@@ -7,3 +7,6 @@
 -- vim.g.lazyvim_python_lsp = "pyright"
 
 vim.o.sessionoptions = "buffers,curdir,folds,help,tabpages,winsize,localoptions"
+
+-- Enable true color support
+vim.opt.termguicolors = true

@@ -1,0 +1,30 @@
+# Ghostty Configuration
+# Theme: Catppuccin Mocha
+# Font: JetBrains Mono
+
+# Theme
+theme = catppuccin-mocha
+
+# Font Configuration
+font-family = JetBrains Mono
+font-size = 13
+
+# Window Appearance
+background-opacity = 0.90
+background-blur = 20
+
+# Window Padding
+window-padding-x = 10
+window-padding-y = 10
+
+# Cursor Configuration
+cursor-style = block
+cursor-opacity = 0.8
+
+# Split Configuration
+unfocused-split-opacity = 0.75
+
+# Additional Settings
+window-decoration = true
+confirm-close-surface = false
+

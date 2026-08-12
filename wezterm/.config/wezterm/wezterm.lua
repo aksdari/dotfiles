@@ -39,6 +39,15 @@ config.keys = {
   { key = "Enter", mods = "CMD", action = wezterm.action.ToggleFullScreen },
   { key = "k", mods = "CMD", action = wezterm.action.ClearScrollback("ScrollbackAndViewport") },
   { key = "0", mods = "CMD", action = wezterm.action.ResetFontSize },
+
+  -- macOS line editing: the terminal has no idea what Cmd means, so translate
+  -- these into the control codes readline and zsh already understand.
+  { key = "Backspace", mods = "CMD", action = wezterm.action.SendKey({ key = "u", mods = "CTRL" }) },
+  { key = "Backspace", mods = "OPT", action = wezterm.action.SendKey({ key = "w", mods = "CTRL" }) },
+  { key = "LeftArrow", mods = "CMD", action = wezterm.action.SendKey({ key = "a", mods = "CTRL" }) },
+  { key = "RightArrow", mods = "CMD", action = wezterm.action.SendKey({ key = "e", mods = "CTRL" }) },
+  { key = "LeftArrow", mods = "OPT", action = wezterm.action.SendKey({ key = "b", mods = "ALT" }) },
+  { key = "RightArrow", mods = "OPT", action = wezterm.action.SendKey({ key = "f", mods = "ALT" }) },
   {
     key = "f",
     mods = "CMD",

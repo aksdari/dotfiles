@@ -49,6 +49,9 @@ Prefix is `C-a`. "`prefix` `x`" means press `C-a`, release, then `x`.
 | `prefix` `$` | Rename the session |
 | `tm` (shell) | Pick a project under `~/github` and attach a session named after it |
 
+The status bar sits at the bottom: session name on the left, window list in the
+middle, and on the right the current directory, CPU, RAM, battery and the date.
+
 Sessions are saved every 15 minutes and restored automatically after a reboot
 (resurrect + continuum). `prefix` `C-s` saves now, `prefix` `C-r` restores.
 
@@ -184,3 +187,19 @@ Deliberately sparse — tmux owns panes, tabs and sessions.
 | `Cmd-f` | Search the scrollback |
 | `Cmd-+` / `Cmd--` | Font size |
 | `Cmd-0` | Reset font size |
+
+### macOS line editing
+
+The terminal has no concept of `Cmd`, so WezTerm translates these into the
+control codes zsh already understands.
+
+| Key | Sends | Effect at the prompt |
+| --- | --- | --- |
+| `Cmd-Backspace` | `C-u` | Delete the whole line |
+| `Opt-Backspace` | `C-w` | Delete the previous word |
+| `Cmd-←` / `Cmd-→` | `C-a` / `C-e` | Start / end of line |
+| `Opt-←` / `Opt-→` | `M-b` / `M-f` | Move one word |
+
+These reach any program in the terminal, so `Cmd-Backspace` in Neovim's insert
+mode also deletes to the start of the line (in normal mode `C-u` is still half a
+page up).

@@ -57,7 +57,7 @@ update: ## Update brew packages, Neovim plugins and tmux plugins
 
 lint: ## shellcheck the scripts and stylua-check the Lua
 	@shellcheck -S warning bootstrap.sh .githooks/*
-	@stylua --check nvim/.config/nvim/lua/
+	@stylua --check nvim/.config/nvim/lua/ wezterm/.config/wezterm/
 	@echo "lint clean"
 
 doctor: ## Check for broken links, unstowed packages and missing tools

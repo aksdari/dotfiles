@@ -1,0 +1,67 @@
+# Machine-local identity stays in ~/.gitconfig, which git reads after this file.
+
+[init]
+	defaultBranch = main
+
+[core]
+	editor = nvim
+	pager = delta
+	excludesfile = ~/.config/git/ignore
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	line-numbers = true
+	side-by-side = false
+	syntax-theme = Catppuccin Mocha
+
+[merge]
+	conflictstyle = zdiff3
+
+[diff]
+	algorithm = histogram
+	colorMoved = default
+
+[pull]
+	rebase = true
+
+[push]
+	default = current
+	autoSetupRemote = true
+	followTags = true
+
+[fetch]
+	prune = true
+	pruneTags = true
+
+[rebase]
+	autoStash = true
+	autoSquash = true
+	updateRefs = true
+
+[branch]
+	sort = -committerdate
+
+[column]
+	ui = auto
+
+[rerere]
+	enabled = true
+
+[help]
+	autocorrect = prompt
+
+[commit]
+	verbose = true
+
+[alias]
+	s = status --short --branch
+	lg = log --oneline --graph --decorate -20
+	last = log -1 --stat
+	undo = reset --soft HEAD~1
+	amend = commit --amend --no-edit
+	wip = commit --all --message "wip"
+	unstage = restore --staged
+	brs = branch --sort=-committerdate --format='%(HEAD) %(color:cyan)%(refname:short)%(color:reset) %(contents:subject)'

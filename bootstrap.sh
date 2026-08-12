@@ -104,9 +104,17 @@ cleanup_legacy() {
   done
 
   # Real files/dirs from the oh-my-zsh + p10k era. Backed up, never deleted.
-  for path in "$HOME/.oh-my-zsh" "$HOME/.p10k.zsh" "$HOME/.tmux" "$HOME/.zshrc"; do
-    [[ -e "$path" && ! -L "$path" ]] && backup_path "$path"
+  for path in "$HOME/.oh-my-zsh" "$HOME/.p10k.zsh" "$HOME/.zshrc"; do
+    if [[ -e "$path" && ! -L "$path" ]]; then
+      backup_path "$path"
+    fi
   done
+
+  # ~/.tmux only counts as legacy when it holds the old tpm checkout; tmux
+  # itself recreates the directory for plugin state, so don't touch that.
+  if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
+    backup_path "$HOME/.tmux"
+  fi
   rm -f "$HOME"/.zcompdump* 2>/dev/null || true
 
   ok "old layout cleared"
@@ -131,12 +139,24 @@ resolve_conflicts() {
   local pkg="$1" out line target
   out="$(stow --no --verbose=1 --target="$HOME" --dir="$DOTFILES" "$pkg" 2>&1 || true)"
   while IFS= read -r line; do
+    target=""
     case "$line" in
-      *"existing target is not owned by stow: "*) target="${line##*: }" ;;
-      *"existing target is neither a link nor a directory: "*) target="${line##*: }" ;;
-      *) continue ;;
+      # stow >= 2.4: "cannot stow <src> over existing target <path> since ..."
+      *"over existing target "*)
+        target="${line#*over existing target }"
+        target="${target%% since*}"
+        ;;
+      # older phrasings
+      *"existing target is not owned by stow: "*)
+        target="${line##*existing target is not owned by stow: }"
+        ;;
+      *"existing target is neither a link nor a directory: "*)
+        target="${line##*: }"
+        ;;
     esac
-    backup_path "$HOME/$target"
+    if [[ -n "$target" ]]; then
+      backup_path "$HOME/$target"
+    fi
   done <<<"$out"
 }
 
@@ -148,7 +168,8 @@ stow_packages() {
   for pkg in "${PACKAGES[@]}"; do
     [[ -d "$DOTFILES/$pkg" ]] || die "no such package: $pkg"
     resolve_conflicts "$pkg"
-    stow --restow --target="$HOME" --dir="$DOTFILES" "$pkg"
+    stow --restow --target="$HOME" --dir="$DOTFILES" "$pkg" \
+      || die "stow failed for '$pkg' — resolve the conflict above and re-run"
     ok "$pkg"
   done
 }
@@ -163,8 +184,16 @@ install_tpm() {
   else
     ok "tpm present"
   fi
-  TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins/" "$tpm/bin/install_plugins" >/dev/null
-  ok "plugins installed"
+  TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins/" "$tpm/bin/install_plugins" \
+    || warn "tpm reported an error"
+
+  local count
+  count=$(find "$HOME/.config/tmux/plugins" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
+  if [[ "$count" -le 1 ]]; then
+    warn "no plugins installed yet — start tmux and press C-a I"
+  else
+    ok "$((count - 1)) plugins installed"
+  fi
 }
 
 # ── 7. zsh plugins that Homebrew does not ship ───────────────────────────────
@@ -180,15 +209,7 @@ install_zsh_plugins() {
   fi
 }
 
-# ── 8. bat theme cache ───────────────────────────────────────────────────────
-build_bat_cache() {
-  step "bat theme"
-  command -v bat >/dev/null 2>&1 || { warn "bat not installed — skipping"; return 0; }
-  bat cache --build >/dev/null
-  ok "Catppuccin Mocha registered"
-}
-
-# ── 9. Neovim plugins ────────────────────────────────────────────────────────
+# ── 8. Neovim plugins ────────────────────────────────────────────────────────
 sync_neovim() {
   step "Neovim plugins"
   command -v nvim >/dev/null 2>&1 || { warn "nvim not installed — skipping"; return 0; }
@@ -196,7 +217,7 @@ sync_neovim() {
   ok "plugins synced"
 }
 
-# ── 10. Login shell ──────────────────────────────────────────────────────────
+# ── 9. Login shell ──────────────────────────────────────────────────────────
 set_login_shell() {
   step "Login shell"
   local brew_zsh="${HOMEBREW_PREFIX:-/usr/local}/bin/zsh"
@@ -223,12 +244,13 @@ main() {
   stow_packages
   install_tpm
   install_zsh_plugins
-  build_bat_cache
   sync_neovim
   set_login_shell
 
   step "Done"
-  [[ -d "$BACKUP" ]] && info "replaced files were backed up to $BACKUP"
+  if [[ -d "$BACKUP" ]]; then
+    info "replaced files were backed up to $BACKUP"
+  fi
   info "next: start a new shell, then run 'atuin import auto' to load old history"
   info "      inside tmux, press C-a I once if any plugin looks missing"
 }

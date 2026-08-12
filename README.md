@@ -24,7 +24,7 @@ anything in its way is moved to `~/.dotfiles-backup-<timestamp>/`.
 3. Migrates `~/.zsh_history` to `~/.local/state/zsh/history`
 4. Stows every package into `$HOME`
 5. Installs tpm and all tmux plugins
-6. Clones `fzf-tab`, builds the bat theme cache
+6. Clones `fzf-tab` for zsh completions
 7. Syncs Neovim plugins headlessly
 8. Tells you how to switch your login shell to Homebrew zsh
 
@@ -40,7 +40,7 @@ anything in its way is moved to `~/.dotfiles-backup-<timestamp>/`.
 | `wezterm` | `~/.config/wezterm/` | Catppuccin Mocha, MesloLGS Nerd Font, blurred transparent window |
 | `starship` | `~/.config/starship.toml` | Two-line prompt: dir, git, runtime versions, command duration |
 | `git` | `~/.config/git/` | delta pager, rebase-by-default, sane fetch/push/rerere, aliases |
-| `bat` | `~/.config/bat/` | Catppuccin Mocha theme (used by `bat`, fzf previews and delta) |
+| `bat` | `~/.config/bat/` | Catppuccin Mocha + style defaults, reused by fzf previews and delta |
 | `aerospace` | `~/.config/aerospace/` | Tiling window manager config |
 
 Identity (`user.name` / `user.email`) stays in `~/.gitconfig`, which git reads
@@ -120,3 +120,15 @@ cp ~/.config/zsh/local.zsh.example ~/.config/zsh/local.zsh
 
 macOS with Homebrew. On Linux, `bootstrap.sh` skips the Homebrew steps — install
 the [`Brewfile`](Brewfile) equivalents with your package manager first, then re-run it.
+
+### Optional: Aerospace
+
+The `aerospace` package stows a config for the tiling window manager, but the app
+itself isn't in the Brewfile — it ships from a third-party tap that Homebrew makes
+you trust explicitly:
+
+```sh
+brew tap nikitabobko/tap
+brew trust nikitabobko/tap
+brew install --cask aerospace
+```

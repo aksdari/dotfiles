@@ -24,6 +24,7 @@ bindkey '^A' beginning-of-line
 bindkey '^E' end-of-line
 bindkey '^U' backward-kill-line
 
-# Accept the autosuggestion without leaving home row.
-bindkey '^ ' autosuggest-accept              # ctrl-space
+# Accept the autosuggestion without leaving home row (widget only exists if the
+# plugin loaded, and bindkey would error out otherwise).
+zle -la autosuggest-accept && bindkey '^ ' autosuggest-accept   # ctrl-space
 bindkey '^[[Z' reverse-menu-complete         # shift-tab

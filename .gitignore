@@ -1,7 +1,7 @@
 # Machine-specific shell config (see zsh/.config/zsh/local.zsh.example)
 zsh/.config/zsh/local.zsh
 
-# Written into the stowed tree at runtime
-bat/.config/bat/themes/*.tmTheme.cache
+# tpm clones plugins into the stowed tree, which is this repo
+tmux/.config/tmux/plugins/
 
 .DS_Store

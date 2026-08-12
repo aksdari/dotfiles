@@ -1,6 +1,7 @@
 # Everything the dotfiles assume exists. Install with `brew bundle` or ./bootstrap.sh.
-
-tap "nikitabobko/tap" # aerospace
+#
+# Aerospace is deliberately not listed: it lives in a third-party tap, and
+# Homebrew requires you to trust that tap yourself. See the README.
 
 # ── Shell ────────────────────────────────────────────────────────────────────
 brew "zsh"
@@ -42,4 +43,3 @@ brew "stylua"
 # ── Apps & fonts ─────────────────────────────────────────────────────────────
 cask "wezterm"
 cask "font-meslo-lg-nerd-font"
-cask "nikitabobko/tap/aerospace"   # tiling window manager

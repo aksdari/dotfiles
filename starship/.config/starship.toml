@@ -1,19 +1,38 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Two lines: context on top, a bare prompt below, so the command you type always
+# starts at the same column no matter how deep the path is.
+#
+# Every segment paints its own block *and* its own trailing  separator.
+# That is what makes a segment safe to omit: nothing downstream depends on it
+# having rendered. The shipped presets instead put separators in this format
+# string, which only works because they force $os/$username/$time to always
+# render — omit one and you are left with a coloured sliver of leftover arrow.
+# ─────────────────────────────────────────────────────────────────────────────
 format = """
-[](surface0)\
+$username\
+$hostname\
 $directory\
-[](fg:surface0 bg:overlay0)\
-$git_branch$git_status\
-[](fg:overlay0 bg:surface1)\
-$nodejs$golang$python$rust$docker_context\
-[](fg:surface1)\
-$cmd_duration\
+$git_branch\
+$git_state\
+$git_status\
+$nodejs$bun$deno$python$golang$rust$java$ruby$php$lua$zig$docker_context\
 $line_break\
-$character"""
+$status$jobs$character"""
+
+right_format = """$cmd_duration$time"""
 
 add_newline = true
-command_timeout = 500
+command_timeout = 800
+scan_timeout = 30
+continuation_prompt = "[∙](fg:overlay0) "
+
+# Root-level keys must all sit above the first [table] header. A key placed
+# after one is parsed as a member of that table — which is how `palette` ended
+# up as a bogus colour inside [palettes.catppuccin_mocha], leaving the palette
+# unselected and every fg:/bg: name below silently unresolved.
+palette = "catppuccin_mocha"
 
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"
@@ -21,87 +40,184 @@ flamingo = "#f2cdcd"
 pink = "#f5c2e7"
 mauve = "#cba6f7"
 red = "#f38ba8"
+maroon = "#eba0ac"
 peach = "#fab387"
 yellow = "#f9e2af"
 green = "#a6e3a1"
 teal = "#94e2d5"
 sky = "#89dceb"
+sapphire = "#74c7ec"
 blue = "#89b4fa"
 lavender = "#b4befe"
 text = "#cdd6f4"
+subtext1 = "#bac2de"
 subtext0 = "#a6adc8"
+overlay2 = "#9399b2"
+overlay1 = "#7f849c"
 overlay0 = "#6c7086"
+surface2 = "#585b70"
 surface1 = "#45475a"
 surface0 = "#313244"
 base = "#1e1e2e"
+mantle = "#181825"
 crust = "#11111b"
 
-palette = "catppuccin_mocha"
+# ── Identity — only when it is not obvious ───────────────────────────────────
+# Locally these stay hidden; over SSH they are the first thing you see.
+[username]
+show_always = false
+style_user = "fg:crust bg:lavender"
+style_root = "fg:crust bg:red"
+format = '[ 󰀉 $user ]($style)[](fg:lavender)'
 
+[hostname]
+ssh_only = true
+style = "fg:crust bg:maroon"
+format = '[ 󰒋 $hostname ]($style)[](fg:maroon)'
+
+# ── Where you are ────────────────────────────────────────────────────────────
 [directory]
-style = "fg:text bg:surface0"
-format = "[ $path ]($style)"
+style = "fg:crust bg:blue"
+# The read-only badge lives in a (…) group so it costs nothing when writable.
+format = '[ $path ]($style)([$read_only](fg:crust bg:blue))[](fg:blue)'
 truncation_length = 3
 truncation_symbol = "…/"
-read_only = " "
+truncate_to_repo = true
+read_only = "󰌾 "
+read_only_style = "fg:crust bg:blue"
 
 [directory.substitutions]
 "Documents" = "󰈙"
-"Downloads" = " "
-"github" = " "
-".config" = " "
+"Downloads" = "󰇚"
+"Pictures" = "󰉏"
+"Music" = "󱍙"
+"Desktop" = "󰇄"
+"github" = ""
+".config" = ""
 
+# ── Git ──────────────────────────────────────────────────────────────────────
 [git_branch]
-symbol = ""
-style = "fg:base bg:overlay0"
-format = "[ $symbol $branch ]($style)"
+symbol = ""
+style = "fg:crust bg:mauve"
+format = '[ $symbol $branch ]($style)[](fg:mauve)'
 
+# Mid-rebase / mid-merge is the one git state worth shouting about.
+[git_state]
+style = "fg:crust bg:red"
+format = '[ $state($progress_current/$progress_total) ]($style)[](fg:red)'
+
+# Its own block, so a dirty tree is a colour you notice rather than a character
+# you have to read. Wrapped in (…) so a clean tree renders nothing at all —
+# without that the module still paints its block and leaves a peach sliver.
+# The style is inline rather than $style because $style is itself a variable,
+# and a (…) group survives as long as any variable inside it is non-empty.
 [git_status]
-style = "fg:base bg:overlay0"
-format = "[$all_status$ahead_behind]($style)"
-conflicted = "= "
+format = '([ $all_status$ahead_behind](fg:crust bg:peach)[](fg:peach))'
+conflicted = "󰞇 "
 ahead = "⇡${count} "
 behind = "⇣${count} "
 diverged = "⇕⇡${ahead_count}⇣${behind_count} "
-untracked = "? "
-stashed = " "
-modified = "! "
-staged = "+ "
-renamed = "» "
-deleted = "✘ "
+untracked = "?${count} "
+stashed = "󰆓${count} "
+modified = "!${count} "
+staged = "+${count} "
+renamed = "»${count} "
+deleted = "✘${count} "
 
+# ── Runtimes — each appears only inside a project that uses it ───────────────
+# All share one surface, and carry their language's colour in the glyph.
 [nodejs]
-symbol = ""
-style = "fg:text bg:surface1"
-format = "[ $symbol ($version) ]($style)"
+symbol = ""
+style = "fg:green bg:surface1"
+format = '[ $symbol $version ]($style)[](fg:surface1)'
 
-[golang]
-symbol = ""
+[bun]
+symbol = ""
+style = "fg:rosewater bg:surface1"
+format = '[ $symbol $version ]($style)[](fg:surface1)'
+
+[deno]
+symbol = ""
 style = "fg:text bg:surface1"
-format = "[ $symbol ($version) ]($style)"
+format = '[ $symbol $version ]($style)[](fg:surface1)'
 
 [python]
-symbol = ""
-style = "fg:text bg:surface1"
-format = "[ $symbol ($version) ]($style)"
+symbol = ""
+style = "fg:yellow bg:surface1"
+format = '[ $symbol $version ]($style)[](fg:surface1)'
+
+[golang]
+symbol = ""
+style = "fg:sky bg:surface1"
+format = '[ $symbol $version ]($style)[](fg:surface1)'
 
 [rust]
-symbol = ""
-style = "fg:text bg:surface1"
-format = "[ $symbol ($version) ]($style)"
+symbol = ""
+style = "fg:peach bg:surface1"
+format = '[ $symbol $version ]($style)[](fg:surface1)'
+
+[java]
+symbol = ""
+style = "fg:red bg:surface1"
+format = '[ $symbol $version ]($style)[](fg:surface1)'
+
+[ruby]
+symbol = ""
+style = "fg:maroon bg:surface1"
+format = '[ $symbol $version ]($style)[](fg:surface1)'
+
+[php]
+symbol = ""
+style = "fg:lavender bg:surface1"
+format = '[ $symbol $version ]($style)[](fg:surface1)'
+
+[lua]
+symbol = ""
+style = "fg:blue bg:surface1"
+format = '[ $symbol $version ]($style)[](fg:surface1)'
+
+[zig]
+symbol = ""
+style = "fg:yellow bg:surface1"
+format = '[ $symbol $version ]($style)[](fg:surface1)'
 
 [docker_context]
-symbol = " "
-style = "fg:text bg:surface1"
-format = "[ $symbol $context ]($style)"
+symbol = "󰡨"
+style = "fg:sapphire bg:surface1"
+format = '[ $symbol $context ]($style)[](fg:surface1)'
 only_with_files = true
 
+# ── Right side — how long it took, and what time it is now ───────────────────
 [cmd_duration]
 min_time = 2000
 style = "fg:yellow"
-format = " [ $duration]($style)"
+format = '[ 󰔟 $duration]($style)'
+
+[time]
+disabled = false
+time_format = "%H:%M"
+style = "fg:overlay0"
+format = '[  󰥔 $time]($style)'
+
+# ── The prompt itself ────────────────────────────────────────────────────────
+[status]
+disabled = false
+style = "fg:red"
+symbol = "✘ "
+# map_symbol would render exit 1 as the word "ERROR", which says less than the
+# number. $status is the raw code, so 1 stays 1 and 130 stays 130.
+map_symbol = false
+format = '[$symbol$status ]($style)'
+
+[jobs]
+symbol = "󰑮 "
+style = "fg:teal"
+number_threshold = 1
+format = '[$symbol$number ]($style)'
 
 [character]
 success_symbol = "[❯](bold green)"
 error_symbol = "[❯](bold red)"
-vimcmd_symbol = "[❮](bold green)"
+vimcmd_symbol = "[❮](bold mauve)"
+vimcmd_replace_symbol = "[❮](bold peach)"
+vimcmd_visual_symbol = "[❮](bold yellow)"

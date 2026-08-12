@@ -64,7 +64,7 @@ make stow    PACKAGES="zsh"
 | `nvim` | `~/.config/nvim/` | LazyVim + curated plugins, Catppuccin, sidekick.nvim wired to Claude Code |
 | `tmux` | `~/.config/tmux/` | `C-a` prefix, vi copy mode, sessionx, resurrect + continuum, Catppuccin status bar |
 | `wezterm` | `~/.config/wezterm/` | Catppuccin Mocha, MesloLGS Nerd Font, blurred transparent window |
-| `starship` | `~/.config/starship.toml` | Two-line prompt: dir, git, runtime versions, command duration |
+| `starship` | `~/.config/starship.toml` | Catppuccin powerline prompt: path, branch, dirty state, runtime versions; duration and clock on the right. Segments appear only when they apply |
 | `git` | `~/.config/git/` | delta pager, rebase-by-default, sane fetch/push/rerere, aliases |
 | `bat` | `~/.config/bat/` | Catppuccin Mocha + style defaults, reused by fzf previews and delta |
 | `aerospace` | `~/.config/aerospace/` | Tiling window manager config |

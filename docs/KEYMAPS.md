@@ -133,6 +133,36 @@ Git blame for the current line is shown inline; toggle it with
 
 ## zsh
 
+### Reading the prompt
+
+Each block appears only when it applies, so a plain directory shows nothing but
+the path.
+
+| Block | Colour | Means |
+| --- | --- | --- |
+| Path | Blue | Current directory, truncated to the repo root |
+| Branch | Mauve | Current git branch |
+| Dirty state | Peach | Working tree has changes — markers below |
+| Rebase/merge | Red | Mid-operation, with `step/total` progress |
+| Runtime | Grey | Language version, only inside a project that uses it |
+| User / host | Lavender / maroon | Over SSH only |
+
+Markers inside the peach block:
+
+| Marker | Means |
+| --- | --- |
+| `!n` | n modified |
+| `+n` | n staged |
+| `?n` | n untracked |
+| `✘n` | n deleted |
+| `»n` | n renamed |
+| `⇡n` / `⇣n` | n commits ahead / behind upstream |
+| `⇕⇡n⇣n` | Diverged from upstream |
+
+On the right: how long the last command took (shown past 2s) and the clock.
+On the prompt line, `❯` turns red and prints the exit code when a command
+fails.
+
 ### Functions
 
 | Command | Action |

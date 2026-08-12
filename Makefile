@@ -55,9 +55,13 @@ update: ## Update brew packages, Neovim plugins and tmux plugins
 	@nvim --headless "+Lazy! sync" +qa
 	@TMUX_PLUGIN_MANAGER_PATH=$(HOME)/.config/tmux/plugins/ $(TPM)/bin/update_plugins all
 
-lint: ## shellcheck the scripts and stylua-check the Lua
+lint: ## shellcheck the scripts, stylua-check the Lua, sanity-check the prompt
 	@shellcheck -S warning bootstrap.sh .githooks/*
 	@stylua --check nvim/.config/nvim/lua/ wezterm/.config/wezterm/
+	@# Both of these once broke the prompt without a single error message: a
+	@# `palette` key placed after a [table] header belongs to that table, and
+	@# Nerd Font glyphs are easy to lose to an editor or a copy-paste.
+	@python3 -c 'import tomllib,sys; p="starship/.config/starship.toml"; s=open(p,encoding="utf-8").read(); d=tomllib.load(open(p,"rb")); e=[]; e.append("root palette unset - is it below a [table] header?") if not d.get("palette") else None; e.append("powerline separators stripped") if chr(0xE0B0) not in s else None; e.append("empty symbol strings - glyphs stripped") if "symbol = "+chr(34)*2 in s else None; sys.exit("starship.toml: "+"; ".join(e)) if e else None'
 	@echo "lint clean"
 
 doctor: ## Check for broken links, unstowed packages and missing tools

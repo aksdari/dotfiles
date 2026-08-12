@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+#
+# This repo is public. Nothing secret leaves the machine.
+#
+# Three gates, all on staged content only:
+#   1. gitleaks  — entropy + provider-specific credential patterns
+#   2. filenames — key material, credential stores, machine-local files
+#   3. contents  — assignments that look like a token even when gitleaks shrugs
+#
+# Installed by `make hooks` (sets core.hooksPath to .githooks).
+#
+set -uo pipefail
+
+if [[ -t 1 ]]; then
+  RED=$'\033[31m'; YELLOW=$'\033[33m'; GREEN=$'\033[32m'; BOLD=$'\033[1m'; RESET=$'\033[0m'
+else
+  RED=""; YELLOW=""; GREEN=""; BOLD=""; RESET=""
+fi
+fail() { printf '%sblocked:%s %s\n' "$RED" "$RESET" "$*" >&2; }
+warn() { printf '%swarning:%s %s\n' "$YELLOW" "$RESET" "$*" >&2; }
+
+status=0
+
+# ── 1. gitleaks ──────────────────────────────────────────────────────────────
+if command -v gitleaks >/dev/null 2>&1; then
+  if ! gitleaks git --staged --no-banner --redact --exit-code 1 .; then
+    fail "gitleaks found credentials in the staged changes"
+    status=1
+  fi
+else
+  warn "gitleaks not installed — run 'make brew'. Falling back to pattern checks."
+fi
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[[ -z "$staged" ]] && exit "$status"
+
+# ── 2. Filenames that must never be tracked ──────────────────────────────────
+# Key material, credential stores, and the machine-local files this repo
+# deliberately keeps out of git.
+name_pattern='(^|/)(\.env(\..*)?|\.netrc|\.npmrc|\.pypirc|\.dockercfg|id_[rd]sa|id_ecdsa|id_ed25519|credentials|local\.zsh)$|\.(pem|key|p12|pfx|jks|keystore|ppk)$'
+
+while IFS= read -r file; do
+  if [[ "$file" =~ $name_pattern ]]; then
+    fail "$file — this filename may not be committed"
+    status=1
+  fi
+done <<<"$staged"
+
+# ── 3. Contents that look like credentials ───────────────────────────────────
+# Deliberately narrow: an assignment of a long opaque value, or a PEM header.
+# Comments and *.example files are exempt so the docs can show the shape.
+content_pattern='(-----BEGIN [A-Z ]*PRIVATE KEY-----)|((api[_-]?key|secret|token|password|passwd|access[_-]?key)[[:space:]]*[=:][[:space:]]*["'"'"']?[A-Za-z0-9/+_-]{20,})'
+
+while IFS= read -r file; do
+  case "$file" in
+    *.example | *.md | .githooks/*) continue ;;
+  esac
+  [[ -f "$file" ]] || continue
+
+  # Only look at added lines, minus shell/lua/toml comments.
+  hits=$(git diff --cached -U0 -- "$file" \
+    | grep '^+' | grep -v '^+++' \
+    | sed 's/^+//' \
+    | grep -vE '^[[:space:]]*(#|--|//)' \
+    | grep -inE "$content_pattern" || true)
+
+  if [[ -n "$hits" ]]; then
+    fail "$file looks like it contains a credential:"
+    printf '%s\n' "$hits" | head -3 | sed 's/^/         /' >&2
+    status=1
+  fi
+done <<<"$staged"
+
+if [[ "$status" -ne 0 ]]; then
+  printf '\n%sCommit aborted.%s Move the value to ~/.config/zsh/local.zsh (gitignored),\n' "$BOLD" "$RESET" >&2
+  printf 'or if this is a false positive, commit with --no-verify.\n' >&2
+else
+  printf '%s✓%s no secrets in staged changes\n' "$GREEN" "$RESET"
+fi
+
+exit "$status"

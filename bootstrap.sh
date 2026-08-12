@@ -217,7 +217,19 @@ sync_neovim() {
   ok "plugins synced"
 }
 
-# ── 9. Login shell ──────────────────────────────────────────────────────────
+# ── 9. Secret-blocking git hooks ─────────────────────────────────────────────
+install_hooks() {
+  step "Git hooks"
+  git -C "$DOTFILES" config core.hooksPath .githooks
+  chmod +x "$DOTFILES"/.githooks/*
+  if command -v gitleaks >/dev/null 2>&1; then
+    ok "pre-commit hook active (gitleaks $(gitleaks version 2>/dev/null))"
+  else
+    warn "pre-commit hook active, but gitleaks is missing — pattern checks only"
+  fi
+}
+
+# ── 10. Login shell ──────────────────────────────────────────────────────────
 set_login_shell() {
   step "Login shell"
   local brew_zsh="${HOMEBREW_PREFIX:-/usr/local}/bin/zsh"
@@ -227,9 +239,7 @@ set_login_shell() {
     return 0
   fi
   warn "current login shell is $SHELL"
-  info "to switch, run:"
-  info "  echo '$brew_zsh' | sudo tee -a /etc/shells"
-  info "  chsh -s '$brew_zsh'"
+  info "to switch to $brew_zsh, run: make shell"
 }
 
 # ── Run ──────────────────────────────────────────────────────────────────────
@@ -245,6 +255,7 @@ main() {
   install_tpm
   install_zsh_plugins
   sync_neovim
+  install_hooks
   set_login_shell
 
   step "Done"

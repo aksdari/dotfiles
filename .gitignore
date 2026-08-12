@@ -1,7 +1,35 @@
-# Machine-specific shell config (see zsh/.config/zsh/local.zsh.example)
+# ── Never commit: this repo is public ────────────────────────────────────────
+# Machine-local shell config (see zsh/.config/zsh/local.zsh.example)
 zsh/.config/zsh/local.zsh
+*.local
 
-# tpm clones plugins into the stowed tree, which is this repo
+# Credentials and key material
+.env
+.env.*
+.netrc
+.npmrc
+.pypirc
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.ppk
+id_rsa*
+id_ecdsa*
+id_ed25519*
+**/credentials
+**/*secret*
+**/*token*
+
+# ── Runtime state written into the stowed tree ───────────────────────────────
+# tpm clones plugins into ~/.config/tmux, which is this repo
 tmux/.config/tmux/plugins/
+tmux/.config/tmux/resurrect/
+
+# Neovim writes these next to the config when a plugin misbehaves
+nvim/.config/nvim/.luarc.json
+nvim/.config/nvim/spell/
 
 .DS_Store

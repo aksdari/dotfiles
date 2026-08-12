@@ -31,6 +31,7 @@ brew "git"
 brew "git-delta"                   # diff pager used by ~/.config/git/config
 brew "gh"
 brew "lazygit"
+brew "gitleaks"                    # secret scanning, run by the pre-commit hook
 
 # ── Languages & formatters ───────────────────────────────────────────────────
 brew "node"                        # needed by several LSP servers

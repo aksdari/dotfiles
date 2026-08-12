@@ -1,23 +1,24 @@
 # dotfiles
 
 Neovim · WezTerm · tmux · zsh — managed with [GNU Stow](https://www.gnu.org/software/stow/),
-themed with [Catppuccin Mocha](https://catppuccin.com), bootstrapped in one command.
+themed with [Catppuccin Mocha](https://catppuccin.com), driven entirely by `make`.
+
+📋 **[Keymap cheatsheet →](docs/KEYMAPS.md)**
 
 ## Quick start
 
 ```sh
 git clone https://github.com/aksdari/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
-./bootstrap.sh
+make install
 ```
 
-Then open a new terminal. That's it.
-
-`bootstrap.sh` is idempotent — re-run it any time. It never deletes a real file:
-anything in its way is moved to `~/.dotfiles-backup-<timestamp>/`.
+Then open a new terminal. `make install` is idempotent — re-run it any time. It
+never deletes a real file: anything in its way moves to
+`~/.dotfiles-backup-<timestamp>/`.
 
 <details>
-<summary>What bootstrap.sh actually does</summary>
+<summary>What <code>make install</code> does</summary>
 
 1. Installs Homebrew if missing, then everything in the [`Brewfile`](Brewfile)
 2. Removes symlinks left over from an older layout, backs up conflicting real files
@@ -26,9 +27,34 @@ anything in its way is moved to `~/.dotfiles-backup-<timestamp>/`.
 5. Installs tpm and all tmux plugins
 6. Clones `fzf-tab` for zsh completions
 7. Syncs Neovim plugins headlessly
-8. Tells you how to switch your login shell to Homebrew zsh
+8. Installs the pre-commit hook that blocks secrets
+9. Tells you how to switch your login shell to Homebrew zsh
 
 </details>
+
+## Commands
+
+```
+make                 list every target
+```
+
+**Setup** — `install` (full setup) · `brew` (Brewfile only) · `hooks` (secret-blocking
+git hooks) · `shell` (make Homebrew zsh the login shell)
+
+**Symlinks** — `stow` · `unstow` · `check` (dry run)
+
+**Maintenance** — `update` (brew + Neovim + tmux plugins) · `lint` (shellcheck +
+stylua) · `doctor` (broken links, missing tools, shell startup time) ·
+`clean` (drop the backup directories)
+
+**Security** — `scan` (working tree + full history) · `scan-staged`
+
+Every target takes a package list:
+
+```sh
+make install PACKAGES="nvim tmux"
+make stow    PACKAGES="zsh"
+```
 
 ## What's in here
 
@@ -43,83 +69,50 @@ anything in its way is moved to `~/.dotfiles-backup-<timestamp>/`.
 | `bat` | `~/.config/bat/` | Catppuccin Mocha + style defaults, reused by fzf previews and delta |
 | `aerospace` | `~/.config/aerospace/` | Tiling window manager config |
 
-Identity (`user.name` / `user.email`) stays in `~/.gitconfig`, which git reads
-*after* the repo's config — so nothing personal is committed here.
+## Secrets
 
-## Day-to-day
+**This repo is public, so nothing machine-specific or secret is tracked.**
 
-```sh
-make            # list every target
-make stow       # re-link all packages
-make check      # dry run: show what stow would change
-make update     # brew upgrade + Lazy sync + tpm update
-make doctor     # list broken symlinks
-make unstow     # remove all symlinks
-```
+- `make hooks` (run automatically by `make install`) points `core.hooksPath` at
+  [`.githooks/`](.githooks). The pre-commit hook blocks a commit when
+  [gitleaks](https://github.com/gitleaks/gitleaks) finds a credential in the
+  staged diff, when a staged filename looks like key material (`*.pem`, `.env`,
+  `id_ed25519`, `local.zsh`, …), or when an added line assigns a long opaque
+  value to something named like a token.
+- [`.gitignore`](.gitignore) refuses the same set of paths in the first place.
+- `make scan` audits the working tree *and* the entire commit history on demand.
 
-Deploy a single package: `stow --target=$HOME nvim`
-(or `./bootstrap.sh nvim tmux` to bootstrap just those).
-
-### Adding a package
-
-Mirror the path it should have in `$HOME`:
-
-```sh
-mkdir -p ghostty/.config/ghostty
-mv ~/.config/ghostty/config ghostty/.config/ghostty/config
-stow --target=$HOME ghostty
-```
-
-Then add the name to `ALL_PACKAGES` in `bootstrap.sh` and `PACKAGES` in the `Makefile`.
-
-### Machine-specific settings
-
-Anything that shouldn't be committed — work paths, SDKs, tokens — goes in
+Anything private — SDK paths, work aliases, API tokens — belongs in
 `~/.config/zsh/local.zsh`, which is gitignored and sourced last:
 
 ```sh
 cp ~/.config/zsh/local.zsh.example ~/.config/zsh/local.zsh
 ```
 
-## Keybindings
+Git identity (`user.name` / `user.email`) stays in `~/.gitconfig`, which git
+reads *after* this repo's config, so it is never committed here.
 
-**tmux** — prefix is `C-a`
+If the hook ever fires on a false positive, `git commit --no-verify` bypasses
+it — check what tripped it first.
 
-| Key | Action |
-| --- | --- |
-| `\|` / `-` | Split vertically / horizontally (in the current dir) |
-| `h j k l` | Resize pane (repeatable) |
-| `m` | Zoom pane |
-| `o` | Session picker (sessionx) |
-| `r` | Reload config |
-| `C-h/j/k/l` | Move between panes *and* Neovim splits (no prefix) |
-| `v` / `y` | Begin selection / yank to clipboard (copy mode) |
+## Adding a package
 
-**Neovim** — leader is `Space`
+Mirror the path the file should have in `$HOME`:
 
-| Key | Action |
-| --- | --- |
-| `<leader>ac` | Toggle Claude Code in a tmux-backed split |
-| `<leader>gd` | Diffview of the working tree |
-| `<leader>gh` | File history |
-| `C-s` | Save from any mode |
-| `C-n` | Add another cursor (visual-multi) |
-| `<leader>p` | Paste over selection without losing the register |
+```sh
+mkdir -p ghostty/.config/ghostty
+mv ~/.config/ghostty/config ghostty/.config/ghostty/config
+make stow PACKAGES=ghostty
+```
 
-**zsh**
-
-| Command | Action |
-| --- | --- |
-| `tm` | Fuzzy-pick a project under `~/github` and attach a tmux session |
-| `f` | Fuzzy-find a file and open it in Neovim |
-| `C-r` | Atuin history search |
-| `C-x C-e` | Edit the current command line in Neovim |
-| `C-space` | Accept the autosuggestion |
+Then add the name to `PACKAGES` in the [`Makefile`](Makefile) and to
+`ALL_PACKAGES` in [`bootstrap.sh`](bootstrap.sh).
 
 ## Requirements
 
-macOS with Homebrew. On Linux, `bootstrap.sh` skips the Homebrew steps — install
-the [`Brewfile`](Brewfile) equivalents with your package manager first, then re-run it.
+macOS with Homebrew and the Xcode command line tools (for `make`). On Linux,
+`make install` skips the Homebrew steps — install the [`Brewfile`](Brewfile)
+equivalents with your package manager first, then re-run it.
 
 ### Optional: Aerospace
 

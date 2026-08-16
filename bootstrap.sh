@@ -11,7 +11,7 @@ set -euo pipefail
 
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
-ALL_PACKAGES=(zsh nvim tmux wezterm starship git bat aerospace)
+ALL_PACKAGES=(zsh nvim tmux ghostty wezterm starship git bat aerospace)
 
 if [[ $# -gt 0 ]]; then
   PACKAGES=("$@")
@@ -217,7 +217,31 @@ sync_neovim() {
   ok "plugins synced"
 }
 
-# ── 9. Secret-blocking git hooks ─────────────────────────────────────────────
+# ── 9. Ghostty terminfo ──────────────────────────────────────────────────────
+# Ghostty sets TERM=xterm-ghostty and points TERMINFO at the copy inside its
+# app bundle, so programs it launches are fine. Anything that does not inherit
+# that environment — a tmux server started elsewhere, a login shell, a script —
+# cannot resolve the entry. Installing it under ~/.terminfo makes TERM valid
+# everywhere on this machine, independent of how the process was started.
+install_ghostty_terminfo() {
+  step "Ghostty terminfo"
+  local bundled=/Applications/Ghostty.app/Contents/Resources/terminfo
+  if [[ ! -d "$bundled" ]]; then
+    warn "Ghostty not installed — skipping"
+    return 0
+  fi
+  if infocmp xterm-ghostty >/dev/null 2>&1; then
+    ok "xterm-ghostty already resolvable"
+    return 0
+  fi
+  if TERMINFO="$bundled" infocmp -x xterm-ghostty 2>/dev/null | tic -x -o "$HOME/.terminfo" - 2>/dev/null; then
+    ok "installed xterm-ghostty into ~/.terminfo"
+  else
+    warn "could not install xterm-ghostty terminfo — ssh to old hosts may misbehave"
+  fi
+}
+
+# ── 10. Secret-blocking git hooks ────────────────────────────────────────────
 install_hooks() {
   step "Git hooks"
   git -C "$DOTFILES" config core.hooksPath .githooks
@@ -229,7 +253,7 @@ install_hooks() {
   fi
 }
 
-# ── 10. Login shell ──────────────────────────────────────────────────────────
+# ── 11. Login shell ──────────────────────────────────────────────────────────
 set_login_shell() {
   step "Login shell"
   local brew_zsh="${HOMEBREW_PREFIX:-/usr/local}/bin/zsh"
@@ -255,6 +279,7 @@ main() {
   install_tpm
   install_zsh_plugins
   sync_neovim
+  install_ghostty_terminfo
   install_hooks
   set_login_shell
 

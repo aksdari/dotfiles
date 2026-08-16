@@ -42,5 +42,6 @@ brew "shellcheck"
 brew "stylua"
 
 # ── Apps & fonts ─────────────────────────────────────────────────────────────
+cask "ghostty"
 cask "wezterm"
 cask "font-meslo-lg-nerd-font"

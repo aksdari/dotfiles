@@ -1,0 +1,86 @@
+# Ghostty — https://ghostty.org
+#
+# tmux owns tabs, splits and sessions, so this stays deliberately small:
+# appearance, the few macOS behaviours worth changing, and nothing that
+# duplicates what tmux already does.
+#
+# Lands at ~/.config/ghostty/config via `make stow PACKAGES=ghostty`.
+# Reload a running instance with cmd+shift+, — background-opacity is the one
+# setting macOS only applies at launch.
+
+# ── Appearance ───────────────────────────────────────────────────────────────
+theme = Catppuccin Mocha
+
+font-family = MesloLGS Nerd Font Mono
+font-size = 13
+adjust-cell-height = 5%
+
+background-opacity = 0.9
+background-blur = 20
+
+# Blending alpha in linear space removes the dark fringing around glyphs that
+# shows up over a translucent background. `linear-corrected` keeps the stroke
+# weight of `native` while dropping the artifacts.
+alpha-blending = linear-corrected
+
+# The titlebar is dead weight under a tiling window manager.
+macos-titlebar-style = hidden
+
+# ── Padding, and the gap under the tmux status line ──────────────────────────
+# A window is almost never an exact multiple of the cell height, so a few
+# pixels are always left over. `balance` spreads that remainder across all four
+# edges instead of dumping it at the bottom, and `extend` paints the padding
+# with the nearest cell's background — so the tmux status bar reaches the
+# bottom edge instead of leaving a translucent strip of desktop. WezTerm needs
+# a resize handler to do this; here it is two settings.
+window-padding-x = 8
+window-padding-y = 8
+window-padding-balance = true
+window-padding-color = extend
+
+# ── Behaviour ────────────────────────────────────────────────────────────────
+mouse-hide-while-typing = true
+cursor-style = bar
+cursor-style-blink = true
+confirm-close-surface = false
+quit-after-last-window-closed = true
+
+# tmux-continuum already restores sessions. Letting macOS restore windows too
+# means both try to rebuild the same layout.
+window-save-state = never
+
+# Aerospace resizes windows constantly; this overlay would never stop flashing.
+resize-overlay = never
+
+# Left option = Alt, so M-b / M-f reach the shell. Right option still composes
+# accented characters.
+macos-option-as-alt = left
+
+# Homebrew installs Ghostty and `make update` upgrades it — one source of
+# truth, rather than the app also updating itself underneath.
+auto-update = off
+
+# ── Shell integration ────────────────────────────────────────────────────────
+# Works with this repo's ZDOTDIR layout: Ghostty's shim unsets ZDOTDIR, sources
+# ~/.zshenv (which points it at ~/.config/zsh), and zsh reads .zshrc from there
+# as normal. Its precmd hook sits alongside starship's and atuin's.
+#
+# ssh-env rewrites TERM to xterm-256color when you ssh out, so remote hosts
+# that have never heard of xterm-ghostty still behave.
+shell-integration = zsh
+shell-integration-features = cursor,title,path,ssh-env,no-sudo,no-ssh-terminfo
+
+# ── Keys ─────────────────────────────────────────────────────────────────────
+# Deliberately empty. Ghostty already ships every macOS line-editing
+# translation this setup needs, which WezTerm had to be taught by hand:
+#
+#   cmd+backspace     C-u    delete the whole line
+#   cmd+left/right    C-a / C-e
+#   opt+left/right    M-b / M-f
+#   cmd+k             clear screen
+#   cmd+f             search
+#   cmd+enter         toggle fullscreen
+#   cmd+up/down       jump between prompts (needs shell integration)
+#
+# opt+backspace sends ESC DEL, which zsh already binds to backward-kill-word.
+# Anything pane- or tab-shaped belongs to tmux.

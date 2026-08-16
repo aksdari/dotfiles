@@ -1,6 +1,7 @@
 # Every operation in this repo runs through here. `make help` lists them all.
 
-PACKAGES ?= zsh nvim tmux wezterm starship git bat aerospace
+PACKAGES ?= zsh nvim tmux ghostty wezterm starship git bat aerospace
+GHOSTTY   := /Applications/Ghostty.app/Contents/MacOS/ghostty
 STOW     := stow --target=$(HOME) --dir=$(CURDIR)
 TPM      := $(HOME)/.config/tmux/plugins/tpm
 BREW_ZSH := $(shell brew --prefix 2>/dev/null)/bin/zsh
@@ -62,6 +63,11 @@ lint: ## shellcheck the scripts, stylua-check the Lua, sanity-check the prompt
 	@# `palette` key placed after a [table] header belongs to that table, and
 	@# Nerd Font glyphs are easy to lose to an editor or a copy-paste.
 	@python3 -c 'import tomllib,sys; p="starship/.config/starship.toml"; s=open(p,encoding="utf-8").read(); d=tomllib.load(open(p,"rb")); e=[]; e.append("root palette unset - is it below a [table] header?") if not d.get("palette") else None; e.append("powerline separators stripped") if chr(0xE0B0) not in s else None; e.append("empty symbol strings - glyphs stripped") if "symbol = "+chr(34)*2 in s else None; sys.exit("starship.toml: "+"; ".join(e)) if e else None'
+	@# Catches unknown keys, bad enum values and missing themes — all of which
+	@# Ghostty otherwise only reports at launch, in a log you are not reading.
+	@if [ -x "$(GHOSTTY)" ]; then \
+		"$(GHOSTTY)" +validate-config --config-file=ghostty/.config/ghostty/config || exit 1; \
+	else echo "  (ghostty not installed — skipping config check)"; fi
 	@echo "lint clean"
 
 doctor: ## Check for broken links, unstowed packages and missing tools

@@ -7,6 +7,7 @@ the tmux prefix is `C-a`.
 - [tmux](#tmux)
 - [Neovim](#neovim)
 - [zsh](#zsh)
+- [Ghostty](#ghostty)
 - [WezTerm](#wezterm)
 
 ## Crossing tools
@@ -206,9 +207,44 @@ fails.
 | `reload` | Restart the shell |
 | `brewup` | update + upgrade + cleanup |
 
+## Ghostty
+
+The config binds nothing at all: Ghostty already ships every one of these as a
+default, including the macOS line editing that WezTerm has to be taught by
+hand. tmux still owns panes, tabs and sessions.
+
+| Key | Action |
+| --- | --- |
+| `Cmd-Enter` | Toggle full screen |
+| `Cmd-k` | Clear screen |
+| `Cmd-f` | Search the scrollback |
+| `Cmd-↑` / `Cmd-↓` | Jump to the previous / next shell prompt |
+| `Cmd-+` / `Cmd--` | Font size |
+| `Cmd-0` | Reset font size |
+| `Cmd-,` | Open this config |
+| `Cmd-Shift-,` | Reload the config in place |
+
+### macOS line editing
+
+The terminal has no concept of `Cmd`, so these are translated into the control
+codes zsh already understands — by Ghostty for the `Cmd` ones, and by zsh's own
+`^[^?` binding for `Opt-Backspace`.
+
+| Key | Sends | Effect at the prompt |
+| --- | --- | --- |
+| `Cmd-Backspace` | `C-u` | Delete the whole line |
+| `Opt-Backspace` | `ESC DEL` | Delete the previous word |
+| `Cmd-←` / `Cmd-→` | `C-a` / `C-e` | Start / end of line |
+| `Opt-←` / `Opt-→` | `M-b` / `M-f` | Move one word |
+
+Left `Opt` acts as `Alt`; right `Opt` still composes accented characters.
+
+`Cmd-Shift-,` reloads everything except `background-opacity`, which macOS only
+applies when the app launches.
+
 ## WezTerm
 
-Deliberately sparse — tmux owns panes, tabs and sessions.
+Kept as a fallback. Deliberately sparse — tmux owns panes, tabs and sessions.
 
 | Key | Action |
 | --- | --- |

@@ -1,7 +1,10 @@
 # dotfiles
 
-Neovim · WezTerm · tmux · zsh — managed with [GNU Stow](https://www.gnu.org/software/stow/),
+Neovim · Ghostty · tmux · zsh — managed with [GNU Stow](https://www.gnu.org/software/stow/),
 themed with [Catppuccin Mocha](https://catppuccin.com), driven entirely by `make`.
+
+Both Ghostty and WezTerm are configured and kept in sync; pick either and the
+rest of the setup behaves identically.
 
 📋 **[Keymap cheatsheet →](docs/KEYMAPS.md)**
 
@@ -63,7 +66,8 @@ make stow    PACKAGES="zsh"
 | `zsh` | `~/.zshenv`, `~/.config/zsh/` | No oh-my-zsh: native zsh, starship prompt, autosuggestions, fast-syntax-highlighting, fzf-tab, atuin, zoxide |
 | `nvim` | `~/.config/nvim/` | LazyVim + curated plugins, Catppuccin, sidekick.nvim wired to Claude Code |
 | `tmux` | `~/.config/tmux/` | `C-a` prefix, vi copy mode, sessionx, resurrect + continuum, Catppuccin status bar |
-| `wezterm` | `~/.config/wezterm/` | Catppuccin Mocha, MesloLGS Nerd Font, blurred transparent window |
+| `ghostty` | `~/.config/ghostty/config` | Catppuccin Mocha, MesloLGS Nerd Font, blurred transparent window, hidden titlebar |
+| `wezterm` | `~/.config/wezterm/` | The same look, kept as a fallback |
 | `starship` | `~/.config/starship.toml` | Catppuccin powerline prompt: path, branch, dirty state, runtime versions; duration and clock on the right. Segments appear only when they apply |
 | `git` | `~/.config/git/` | delta pager, rebase-by-default, sane fetch/push/rerere, aliases |
 | `bat` | `~/.config/bat/` | Catppuccin Mocha + style defaults, reused by fzf previews and delta |
